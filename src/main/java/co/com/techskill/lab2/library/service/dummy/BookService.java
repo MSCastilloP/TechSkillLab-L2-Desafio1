@@ -3,6 +3,7 @@ package co.com.techskill.lab2.library.service.dummy;
 import co.com.techskill.lab2.library.config.BookMapper;
 import co.com.techskill.lab2.library.config.BookMapperImpl;
 import co.com.techskill.lab2.library.domain.dto.BookDTO;
+import co.com.techskill.lab2.library.domain.entity.Book;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -37,5 +38,8 @@ public class BookService {
                         .filter(bookDTO -> bookDTO.getBookId().equals(id))
                         .findFirst()
         );
+    }
+    public Mono<Book>save(Book book){
+        return Mono.justOrEmpty(book);
     }
 }

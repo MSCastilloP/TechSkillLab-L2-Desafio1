@@ -1,10 +1,8 @@
 package co.com.techskill.lab2.library.service.impl;
 
-import co.com.techskill.lab2.library.config.PetitionMapper;
-import co.com.techskill.lab2.library.config.PetitionMapperImpl;
 import co.com.techskill.lab2.library.domain.dto.PetitionDTO;
-import co.com.techskill.lab2.library.repository.IPetitionRepository;
 import co.com.techskill.lab2.library.service.IPetitionService;
+import co.com.techskill.lab2.library.service.dummy.PetitionService;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -13,56 +11,57 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 @Service
 public class PetitionServiceImpl implements IPetitionService {
 
-    private final IPetitionRepository petitionRepository;
-    private final PetitionMapper petitionMapper;
+    private final PetitionService petitionService;
 
-    public PetitionServiceImpl(IPetitionRepository petitionRepository){
-        this.petitionRepository = petitionRepository;
-        this.petitionMapper = new PetitionMapperImpl();
+    public PetitionServiceImpl(PetitionService petitionService){
+        this.petitionService = petitionService;
     }
     @Override
     public Flux<PetitionDTO> findALl() {
-        return petitionRepository
-                .findAll()
-                .map(petitionMapper::toDTO);
+        return petitionService
+                .dummyFindAll();
     }
 
     @Override
     public Mono<PetitionDTO> findById(String id) {
-        return petitionRepository
-                .findByPetitionId(id)
-                .map(petitionMapper::toDTO);
+        return petitionService
+                .dummyFindById(id);
     }
 
     @Override
     public Mono<PetitionDTO> save(PetitionDTO petitionDTO) {
         petitionDTO.setPetitionId(UUID.randomUUID().toString().substring(0,10));
         petitionDTO.setSentAt(LocalDate.now());
-        return petitionRepository
-                .save(petitionMapper.toEntity(petitionDTO))
-                .map(petitionMapper::toDTO);
+        return petitionService
+                .dummySave(petitionDTO);
     }
 
     //TO-DO: Filter example findByPriority
     @Override
     public Flux<PetitionDTO> findByPriority(Integer p) {
-        return petitionRepository.findAll()
-                .filter(petition -> petition.getPriority() == 5)
-                .map(petition -> petitionMapper.toDTO(petition));
+        return petitionService.dummyFindAll()
+                .filter(filterPriorityBy(p));
+    }
+
+    private Predicate<PetitionDTO> filterPriorityBy(Integer priority){
+        return petitionDTO -> petitionDTO.getPriority().equals(priority);
     }
 
     //TO-DO: Check priorities with a delay of 1 second to show up the processing in console but requested in Swagger UI
     @Override
-    public Flux<String> checkPriorities(Integer p) {
-        return findByPriority(p)
-                .map(petitionDTO -> LocalTime.now() + " - Check priority with level " + p
+    public Flux<String> checkPrioritiesGreaterThanSeven() {
+        return findALl()
+                .limitRate(20)
+                .filter(petitionDTO -> petitionDTO.getPriority()>=7)
+                .map(petitionDTO -> LocalTime.now() + " - Check priority with level " + petitionDTO.getPriority()
                 + ", Petition ID: " + petitionDTO.getPetitionId()
                 +",  For Book ID:  " + petitionDTO.getBookId()+"\n")
-                .delayElements(Duration.ofMillis(5000))
+                .delayElements(Duration.ofMillis(1000))
                 .doOnNext(System.out::println);
     }
 

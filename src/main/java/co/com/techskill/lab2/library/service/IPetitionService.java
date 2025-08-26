@@ -10,7 +10,7 @@ public interface IPetitionService {
     Mono<PetitionDTO> save (PetitionDTO petitionDTO);
 
     Flux<PetitionDTO> findByPriority(Integer p);
-    Flux<String> checkPriorities(Integer p);
+    Flux<String> checkPrioritiesGreaterThanSeven();
 
 
 }

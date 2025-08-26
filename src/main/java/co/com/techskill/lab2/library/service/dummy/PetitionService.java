@@ -47,6 +47,10 @@ public class PetitionService {
                         .findFirst()
         );
     }
+    public Mono<PetitionDTO> dummySave(PetitionDTO petitionDTO){
+        petitions.add(petitionDTO);
+        return Mono.justOrEmpty(petitionDTO);
+    }
 
     //TO - DO: Challenge #1
 }

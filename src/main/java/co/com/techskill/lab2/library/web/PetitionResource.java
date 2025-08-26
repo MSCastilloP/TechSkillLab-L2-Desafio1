@@ -34,10 +34,13 @@ public class PetitionResource {
 
     }
 
-    @PostMapping("/check")
-    public Flux<String> checkPetitions(@RequestBody PetitionDTO petitionDTO){
-        return petitionService.checkPriorities(petitionDTO.getPriority());
-    }
 
+
+
+    @GetMapping("/priorityGreaterThanSeven")
+    public Flux<String> priorityGreaterThanSeven(){
+        return petitionService.checkPrioritiesGreaterThanSeven();
+
+    }
 
 }
